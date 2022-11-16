@@ -171,6 +171,7 @@ class Clock(QMainWindow, Ui_MainWindow):
         self.take_db()
         self.melodies()
         self.buttonGroup = QButtonGroup(self)
+        # создаем кнопки будильнику
         for i in range(6):
             a = QPushButton(self.a[i][-1], self)
             a.clicked.connect(self.upd_alarm)
@@ -192,6 +193,7 @@ class Clock(QMainWindow, Ui_MainWindow):
         self.about_action.triggered.connect(self.about)
 
     def about(self):
+        # запускаем памятку
         self.aboutwindow.show()
 
     def stop(self):
@@ -201,13 +203,16 @@ class Clock(QMainWindow, Ui_MainWindow):
         self.lcdNumber_3.display(0)
 
     def updateLCD(self):
+        # обновляем lcd display и выставляем время
         self.currentTime = QTime.currentTime()
         self.strCurrentTime = self.currentTime.toString('hh:mm')
         self.lcdNumber.display(self.strCurrentTime)
 
     def toggle_btns(self, value=True):
+        # выключаем слайдер и кнопку старт
         self.slider.setEnabled(value)
         self.pushButton.setEnabled(value)
+        # включаем кнопку стоп
         self.pushButton_2.setEnabled(True)
 
     def start_btn_clicked(self):
@@ -253,12 +258,13 @@ class Clock(QMainWindow, Ui_MainWindow):
 
     def melodies(self):
         self.m = ()
-
+        # подключение к базе данных
         con = sqlite3.connect('alarm_clock.db')
 
         # Создание курсора
         cur = con.cursor()
 
+        # выполнение запроса и получение имен мелодий
         result = cur.execute("""SELECT name FROM melodies""").fetchall()
 
         for elem in result:
@@ -268,13 +274,13 @@ class Clock(QMainWindow, Ui_MainWindow):
 
     def take_db(self):
         self.a = []
-
+        # забираем данные из таблицы
         con = sqlite3.connect('alarm_clock.db')
 
         # Создание курсора
         cur = con.cursor()
 
-        # Выполнение запроса и получение всех результатов
+        # Выполнение запроса и получение мелодии
         result = cur.execute("""SELECT melody, time FROM alarmClock""").fetchall()
 
         # Вывод результатов на экран
@@ -289,7 +295,7 @@ class Clock(QMainWindow, Ui_MainWindow):
         # Создание курсора
         cur = con.cursor()
 
-        # Выполнение запроса и получение всех результатов
+        # Выполнение запроса и получение пути к мелодиям
         result = cur.execute(f"""SELECT path FROM melodies
                             WHERE id = {n}""").fetchall()
 
@@ -300,9 +306,11 @@ class Clock(QMainWindow, Ui_MainWindow):
         con.close()
 
     def upd_alarm(self):
+        # изменение будильника
         self.s = self.sender()
         self.send = self.sender().text()
 
+        # диалоговое окно с выбором мелодии
         self.text, self.ok = QInputDialog.getItem(self, "Мелодия",
                                                   "Выберите мелодию",
                                                   self.m, 2, False)
@@ -310,12 +318,15 @@ class Clock(QMainWindow, Ui_MainWindow):
         self.alarm_time()
 
     def add_2(self):
+        # выставляется мелодия и время
         if self.ok and self.text:
             self.upd(self.text, self.tm)
         else:
+            # ставится время и мелодия по умолчанию
             self.upd('Die, die, die my darling- Misfits', '00:00')
 
     def upd(self, name, tm):
+        # подключаем базу данных
         con = sqlite3.connect('alarm_clock.db')
 
         # Создание курсора
@@ -338,10 +349,12 @@ class Clock(QMainWindow, Ui_MainWindow):
         self.take_db()
 
     def stop_alarm(self):
+        # остановка проигрывание мелодии будильника по нажатию кнопки
         self.player.stop()
         self.pushButton_8.setEnabled(False)
 
     def check(self):
+        # проверка будильника(настало ли его время)
         for i in self.a:
             if self.strCurrentTime == i[-1]:
                 print(*self.mel(i[0]))
@@ -352,22 +365,26 @@ class Clock(QMainWindow, Ui_MainWindow):
                 self.timerAlarm.start(60000)
 
     def load_mp3(self, filename):
+        # загрузка мелодии
         media = QtCore.QUrl.fromLocalFile(filename)
         content = QtMultimedia.QMediaContent(media)
         self.player = QtMultimedia.QMediaPlayer()
         self.player.setMedia(content)
 
     def alarm_time(self):
+        # диалоговое окно с выбором времени будильника
         self.dialog = Time_Dialog()
         self.dialog.submitClicked.connect(self.time_set)
         self.dialog.show()
 
     def time_set(self, tm):
+        # принимаем значение из диалогового окна
         self.tm = tm
         self.add_2()
 
 
 class AboutWindow(QWidget):
+    # создание памятки
     def __init__(self):
         super(AboutWindow, self).__init__()
         self.setWindowTitle('О программе')
