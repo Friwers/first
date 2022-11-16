@@ -323,7 +323,7 @@ class Clock(QMainWindow, Ui_MainWindow):
             self.upd(self.text, self.tm)
         else:
             # ставится время и мелодия по умолчанию
-            self.upd('Die, die, die my darling- Misfits', '00:00')
+            self.upd('Metallica - Master of Pupets', '00:00')
 
     def upd(self, name, tm):
         # подключаем базу данных
